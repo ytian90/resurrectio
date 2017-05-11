@@ -74,6 +74,11 @@ CasperRenderer.prototype.space = function() {
   this.document.write("\n");
 }
 
+CasperRenderer.prototype.space2 = function() {
+  this.document.write("\n");
+  this.document.write("\n");
+}
+
 CasperRenderer.prototype.regexp_escape = function(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s\/]/g, "\\$&");
 };
@@ -200,13 +205,33 @@ CasperRenderer.prototype.writeHeader = function() {
   // TODO package name import
   this.stmt("package com.ebay.webdriver.flashsalesweb.flexihub;", 0);
   this.space();
+  // TODO import files
+  var import_prefix = "import";
+  var imports = [
+    'com.ebay.testinfrastructure.testdrivers.annotations.Automate;',
+    'com.ebay.testinfrastructure.testdrivers.enums.Site;',
+    'com.ebay.testinfrastructure.ui_testdata.uitestsdriver.UIBaseTestWithData;',
+    'com.ebay.testinfrastructure.webautil.actions.WebActions;',
+    'com.ebay.testinfrastructure.webautil.asserts.UIChainAssert;',
+    'com.ebay.testinfrastructure.webautil.uitestsdriver.UIListener;',
+    'com.ebay.webdriver.flashsalesweb.Contacts;',
+    'com.ebay.webdriver.flashsalesweb.FlashSalesWebDataProvider;'
+  ];
+
+  for (i = 0; i < imports.length; i++) {
+    this.stmt(import_prefix + " " + imports[i], 0);
+  }
+
+  this.space();
+
   // TODO test case name import
   this.stmt("public class FlexiHubHttpsTests extends UIBaseTestWithData {", 0);
+
+  this.writeTestCaseHeader();
 }
 CasperRenderer.prototype.writeFooter = function() {
     this.space();
-    this.stmt("casper.run(function() {test.done();});");
-    this.stmt("});", 0);
+    this.stmt("}", 0);
   }
 CasperRenderer.prototype.rewriteUrl = function(url) {
   return url;
@@ -490,6 +515,27 @@ CasperRenderer.prototype.waitAndTestSelector = function(selector) {
   this.stmt('        test.assertExists(' + selector + ');')
   this.stmt('});');
 }
+
+CasperRenderer.prototype.writeTestCaseHeader = function() {
+  var manager = 'ADELRIO';
+  var owner = 'LOUIS';
+  var dataProvider = 'FlexiHubHttpsPoolInputUrl';
+  var dataProviderClass = 'FlashSalesWebDataProvider';
+  var testCaseName = 'testFlexiHubAutoHttpsUrls';
+  this.stmt('@Automate(manager = Contacts.' + manager + ', owner = Contacts.' + owner +')');
+  this.stmt('@Test(dataProvider= "' + dataProvider + '", dataProviderClass = '+ dataProviderClass + '.class)');
+  this.stmt('public void ' + testCaseName + '(String url, Site site, String propFile) throw Exception {');
+
+  this.space2();
+  this.stmt('}');
+}
+
+CasperRenderer.prototype.initVarsInTestCase = function() {
+  this.stmt('WebDriver driver = UIListener.uiDriver.get();');
+  this.stmt('');
+  this.stmt('');
+}
+
 CasperRenderer.prototype.postToCasperbox = function() {
   var xhr = new XMLHttpRequest();
   xhr.open('POST', 'https://api.casperbox.com/scripts', true);

@@ -66,7 +66,7 @@ CasperRenderer.prototype.pyrepr = function(text, escape) {
   // There should a more eloquent way of doing this but by  doing the escaping before adding the string quotes prevents the string quotes from accidentally getting escaped creating a syntax error in the output code.
 	var s = text;
 	if (escape) s = s.replace(/(['"])/g, "\\$1");
-	var s = "'" + s + "'"; 
+	var s = "'" + s + "'";
   return s;
 }
 
@@ -132,7 +132,7 @@ CasperRenderer.prototype.render = function(with_xy) {
   this.with_xy = with_xy;
   var etypes = EventTypes;
   this.document.open();
-  this.document.writeln('<button id="casperbox-button">Run it on Casperbox</button>');
+  // this.document.writeln('<button id="casperbox-button">Run it on Casperbox</button>');
   this.document.write("<" + "pre" + ">");
   this.writeHeader();
   var last_down = null;
@@ -142,7 +142,7 @@ CasperRenderer.prototype.render = function(with_xy) {
     var item = this.items[i];
     if (item.type == etypes.Comment)
       this.space();
-    
+
     if(i==0) {
         if(item.type!=etypes.OpenUrl) {
             this.text("ERROR: the recorded sequence does not start with a url openning.");
@@ -175,7 +175,7 @@ CasperRenderer.prototype.render = function(with_xy) {
     }
 
     // we do not want click due to user checking actions
-    if(i>0 && item.type==etypes.Click && 
+    if(i>0 && item.type==etypes.Click &&
             ((this.items[i-1].type>=etypes.CheckPageTitle && this.items[i-1].type<=etypes.CheckImageSrc) || this.items[i-1].type==etypes.ScreenShot)) {
         continue;
     }
@@ -197,7 +197,11 @@ CasperRenderer.prototype.writeHeader = function() {
   this.text("/* Casper generated " + date + " */", 0);
   this.text("/*==============================================================================*/", 0);
   this.space();
-  this.stmt("var x = require('casper').selectXPath;", 0);
+  // TODO package name import
+  this.stmt("package com.ebay.webdriver.flashsalesweb.flexihub;", 0);
+  this.space();
+  // TODO test case name import
+  this.stmt("public class FlexiHubHttpsTests extends UIBaseTestWithData {", 0);
 }
 CasperRenderer.prototype.writeFooter = function() {
     this.space();
@@ -223,7 +227,7 @@ CasperRenderer.prototype.startUrl = function(item) {
   this.stmt("}", 1);
   this.stmt("});", 0);
   this.stmt("casper.test.begin('Resurrectio test', function(test) {", 0);
-  this.stmt("casper.start(" + url + ");");        
+  this.stmt("casper.start(" + url + ");");
 }
 CasperRenderer.prototype.openUrl = function(item) {
   var url = this.pyrepr(this.rewriteUrl(item.url));
@@ -264,7 +268,7 @@ CasperRenderer.prototype.getControl = function(item) {
 
   return selector;
 }
-  
+
 CasperRenderer.prototype.getControlXPath = function(item) {
   var type = item.info.type;
   var way;
@@ -280,6 +284,7 @@ CasperRenderer.prototype.getControlXPath = function(item) {
   return way;
 }
 
+// Method to get the xpath
 CasperRenderer.prototype.getLinkXPath = function(item) {
   var way;
   if (item.text)
@@ -487,15 +492,15 @@ CasperRenderer.prototype.waitAndTestSelector = function(selector) {
 }
 CasperRenderer.prototype.postToCasperbox = function() {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', 'https://api.casperbox.com/scripts', true); 
+  xhr.open('POST', 'https://api.casperbox.com/scripts', true);
   xhr.onload = function() {
     if (this.status == 202) {
       response = JSON.parse(this.responseText);
-      window.open('https://ide.casperbox.com/?' + response.id);  
+      window.open('https://ide.casperbox.com/?' + response.id);
     } else {
       alert("Error "+this.status);
     }
-    
+
   };
   xhr.send(document.getElementsByTagName('pre')[0].innerText);
 }
